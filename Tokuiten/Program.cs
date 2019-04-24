@@ -44,10 +44,17 @@ namespace Tokuiten
                         {
                             var channel = jMsg.AsObjectGetString("channel");
                             var nick = jMsg.AsObjectGetString("nick");
-                            if (allChat.TryAdd(socket, new UserEntity() {Channel = channel, Nick = nick}))
+                            if (allChat.TryAdd(socket, new UserEntity {Channel = channel, Nick = nick}))
                                 foreach (var item in allChat)
                                     if (item.Value.Channel == channel)
                                         item.Key.Send($"{allChat[socket].Nick}:join");
+                        }
+                        if (cmd == "chat")
+                        {
+                            var text = jMsg.AsObjectGetString("text");
+                                foreach (var item in allChat)
+                                    if (item.Value.Channel == allChat[socket].Channel)
+                                        item.Key.Send($"{allChat[socket].Nick}:{text}");
                         }
                     }
                     

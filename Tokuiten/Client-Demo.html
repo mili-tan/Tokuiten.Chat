@@ -1,42 +1,48 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
+<html lang="zh-CN">
 <head>
-    <title>websocket client</title>
+    <title>Tokuiten Client</title>
     <script type="text/javascript">
-        var start = function () {
-            var inc = document.getElementById('incoming');
-            var wsImpl = window.WebSocket || window.MozWebSocket;
-            var form = document.getElementById('sendForm');
-            var input = document.getElementById('sendText');
+        const start = function () {
+            const inc = document.getElementById('incoming');
+            const wsImp = window.WebSocket || window.MozWebSocket;
+            const form = document.getElementById('sendForm');
+            const inputText = document.getElementById('sendText');
 
             inc.innerHTML += "#:正在连接…<br/>";
 
-            // create a new websocket and connect
-            window.ws = new wsImpl('ws://localhost:23333');
+            window.ws = new wsImp('ws://localhost:23333');
 
-            // when data is comming from the server, this metod is called
             ws.onmessage = function (evt) {
-                inc.innerHTML += evt.data + '<br/>';
+                const jMsg = JSON.parse(evt.data);
+                if (jMsg.cmd === 'chat') {
+                    inc.innerHTML += `${jMsg.nick}:${jMsg.text}<br/>`;
+                } else if (jMsg.cmd === 'join') {
+                    inc.innerHTML += `#:${jMsg.nick}加入了聊天<br/>`;
+                } else if (jMsg.cmd === 'leave') {
+                    inc.innerHTML += `#:${jMsg.nick}离开了聊天<br/>`;
+                } else {
+                    inc.innerHTML += evt.data + '<br/>';
+                }
             };
 
-            // when the connection is established, this method is called
             ws.onopen = function () {
                 inc.innerHTML += '#:已连接<br/>';
-                var nick = prompt('Nickname:', Math.random().toString(36).substr(2));
-                var channel = prompt('Channel:', '233');
+                const nick = prompt('您的昵称:', Math.random().toString(32).substr(8));
+                const channel = prompt('您的频道:', '233');
+                inc.innerHTML += `#:您的昵称:[${nick}], 您的频道:[${channel}]<br/>`;
                 ws.send(JSON.stringify({cmd: 'join', nick: nick, channel: channel}));
             };
 
-            // when the connection is closed, this method is called
             ws.onclose = function () {
                 inc.innerHTML += '#:服务器断开<br/>';
             };
 
             form.addEventListener('submit', function (e) {
                 e.preventDefault();
-                var val = input.value;
-                ws.send(JSON.stringify({cmd: 'chat', text: val}));
-                input.value = "";
+                const context = inputText.value;
+                ws.send(JSON.stringify({cmd: 'chat', text: context}));
+                inputText.clear();
             });
 
         };
@@ -46,7 +52,7 @@
 </head>
 <body>
    <form id="sendForm">
-       <input id="sendText" placeholder="按下回车发送文本" />
+       <label for="sendText"></label><input id="sendText" placeholder="按下回车发送文本" />
    </form>
 <pre id="incoming"></pre>
 </body>

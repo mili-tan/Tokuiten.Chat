@@ -26,7 +26,7 @@ namespace Tokuiten
                     {
                         foreach (var item in allChat)
                             if (item.Value.Channel == allChat[socket].Channel)
-                                item.Key.Send($"{allChat[socket].Nick}:leave:{Guid.NewGuid()}");
+                                item.Key.Send($"{{\"cmd\": \"leave\",\"nick\": \"{item.Value.Nick}\"}}");
 
                         allChat.Remove(socket);
                     }
@@ -46,24 +46,30 @@ namespace Tokuiten
                                 if (allChat.TryAdd(socket, new UserEntity {Channel = channel, Nick = nick}))
                                     foreach (var item in allChat)
                                         if (item.Value.Channel == channel)
-                                            item.Key.Send($"{allChat[socket].Nick}:join:{Guid.NewGuid()}");
+                                            item.Key.Send($"{{\"cmd\": \"join\",\"nick\": \"{nick}\"}}");
                                 break;
                             }
                             case "chat":
                             {
                                 var text = jMsg.AsObjectGetString("text");
+                                var nick = allChat[socket].Nick;
+                                var cid = Guid.NewGuid();
                                 foreach (var item in allChat)
                                     if (item.Value.Channel == allChat[socket].Channel)
-                                        item.Key.Send($"{allChat[socket].Nick}:{text}:{Guid.NewGuid()}");
+                                        item.Key.Send(
+                                            $"{{\"cmd\": \"chat\",\"nick\": \"{nick}\",\"text\": \"{text}\"}},\"cid\": \"{cid}\"");
                                 break;
                             }
                             case "whisper":
                             {
                                 var toWho = jMsg.AsObjectGetString("to");
                                 var text = jMsg.AsObjectGetString("text");
+                                var nick = allChat[socket].Nick;
+                                var cid = Guid.NewGuid();
                                 foreach (var item in allChat)
                                     if (item.Value.Channel == allChat[socket].Channel && item.Value.Nick == toWho)
-                                        item.Key.Send($"{allChat[socket].Nick}:{text}:{Guid.NewGuid()}");
+                                        item.Key.Send(
+                                            $"{{\"cmd\": \"whisper\",\"nick\": \"{nick}\",\"text\": \"{text}\"}},\"cid\": \"{cid}\"");
                                 break;
                             }
                             case "delete":

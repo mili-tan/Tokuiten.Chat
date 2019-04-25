@@ -27,7 +27,7 @@ namespace Tokuiten
                     {
                         foreach (var item in allChat)
                             if (item.Value.Channel == allChat[socket].Channel)
-                                item.Key.Send($"{{\"cmd\": \"leave\",\"nick\": \"{item.Value.Nick}\"}}");
+                                item.Key.Send($"{{\"cmd\": \"leave\",\"nick\": \"{allChat[socket].Nick}\"}}");
 
                         allChat.Remove(socket);
                     }

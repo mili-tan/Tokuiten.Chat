@@ -68,6 +68,19 @@ namespace Tokuiten
                                     item.Key.Send(
                                         $"{{\"cmd\": \"chat\",\"nick\": \"{nick}\",\"text\": \"{text}\",\"cid\": \"{cid}\"}}");
                         }
+                        if (cmd == "encrypt-chat")
+                        {
+                            var text = jMsg.AsObjectGetString("text");
+                            var encrypt = jMsg.AsObjectGetString("encrypt");
+                            var nick = allChat[socket].Nick;
+                            var channel = allChat[socket].Channel;
+                            var cid = Guid.NewGuid();
+
+                            foreach (var item in allChat)
+                                if (item.Value.Channel == channel)
+                                    item.Key.Send(
+                                        $"{{\"cmd\": \"encrypt-chat\",\"encrypt\": \"{encrypt}\",\"nick\": \"{nick}\",\"text\": \"{text}\",\"cid\": \"{cid}\"}}");
+                        }
                         if (cmd == "whisper")
                         {
                             var toWho = jMsg.AsObjectGetString("to");

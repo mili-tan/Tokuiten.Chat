@@ -45,10 +45,16 @@ namespace Tokuiten
                         {
                             var channel = jMsg.AsObjectGetString("channel");
                             var nick = jMsg.AsObjectGetString("nick");
-                            if (allChat.TryAdd(socket, new UserEntity {Channel = channel, Nick = nick}))
-                                foreach (var item in allChat)
-                                    if (item.Value.Channel == channel)
-                                        item.Key.Send($"{{\"cmd\": \"join\",\"nick\": \"{nick}\"}}");
+
+                            if (allChat.ContainsValue(new UserEntity {Channel = channel, Nick = nick}))
+                                socket.Send("{\"cmd\": \"error\",\"text\": \"nickname-exists\"}");
+                            else
+                            {
+                                if (allChat.TryAdd(socket, new UserEntity {Channel = channel, Nick = nick}))
+                                    foreach (var item in allChat)
+                                        if (item.Value.Channel == channel)
+                                            item.Key.Send($"{{\"cmd\": \"join\",\"nick\": \"{nick}\"}}");
+                            }
                         }
                         if (cmd == "chat")
                         {
@@ -56,6 +62,7 @@ namespace Tokuiten
                             var nick = allChat[socket].Nick;
                             var channel = allChat[socket].Channel;
                             var cid = Guid.NewGuid();
+
                             foreach (var item in allChat)
                                 if (item.Value.Channel == channel)
                                     item.Key.Send(
@@ -67,6 +74,7 @@ namespace Tokuiten
                             var text = jMsg.AsObjectGetString("text");
                             var nick = allChat[socket].Nick;
                             var cid = Guid.NewGuid();
+
                             foreach (var item in allChat)
                                 if (item.Value.Channel == allChat[socket].Channel && item.Value.Nick == toWho)
                                     item.Key.Send(
@@ -75,6 +83,7 @@ namespace Tokuiten
                         if (cmd == "delete")
                         {
                             var cid = jMsg.AsObjectGetString("cid");
+
                             foreach (var item in allChat)
                                 if (item.Value.Channel == allChat[socket].Channel)
                                     item.Key.Send($"{allChat[socket].Nick}:delete:{cid}");
@@ -83,6 +92,7 @@ namespace Tokuiten
                         {
                             var cid = jMsg.AsObjectGetString("cid");
                             var text = jMsg.AsObjectGetString("text");
+
                             foreach (var item in allChat)
                                 if (item.Value.Channel == allChat[socket].Channel)
                                     item.Key.Send($"{allChat[socket].Nick}:edit:{cid}:{text}");

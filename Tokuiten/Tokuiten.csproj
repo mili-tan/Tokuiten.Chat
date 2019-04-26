@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Client-Demo.html" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Fleck" Version="1.1.0" />
   </ItemGroup>
 

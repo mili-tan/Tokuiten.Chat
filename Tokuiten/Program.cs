@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Fleck;
 using MojoUnity;
+using Newtonsoft.Json;
 
 namespace Tokuiten
 {
@@ -27,7 +28,8 @@ namespace Tokuiten
                     {
                         foreach (var item in allChat)
                             if (item.Value.Channel == allChat[socket].Channel)
-                                item.Key.Send($"{{\"cmd\": \"leave\",\"nick\": \"{allChat[socket].Nick}\"}}");
+                                item.Key.Send(JsonConvert.SerializeObject(new
+                                    {cmd = "leave", nick = allChat[socket].Nick}));
 
                         allChat.Remove(socket);
                     }
@@ -44,71 +46,73 @@ namespace Tokuiten
                         if (cmd == "join")
                         {
                             var channel = jMsg.AsObjectGetString("channel");
-                            var nick = jMsg.AsObjectGetString("nick");
+                            var mNick = jMsg.AsObjectGetString("nick");
 
-                            if (allChat.ContainsValue(new UserEntity {Channel = channel, Nick = nick}))
-                                socket.Send("{\"cmd\": \"error\",\"text\": \"nickname-exists\"}");
+                            if (allChat.ContainsValue(new UserEntity {Channel = channel, Nick = mNick}))
+                                socket.Send(JsonConvert.SerializeObject(new {cmd = "error", text = "nickname-exists"}));
                             else
                             {
-                                if (allChat.TryAdd(socket, new UserEntity {Channel = channel, Nick = nick}))
+                                if (allChat.TryAdd(socket, new UserEntity {Channel = channel, Nick = mNick}))
                                     foreach (var item in allChat)
                                         if (item.Value.Channel == channel)
-                                            item.Key.Send($"{{\"cmd\": \"join\",\"nick\": \"{nick}\"}}");
-                            }
+                                            item.Key.Send(JsonConvert.SerializeObject(new
+                                                {cmd = "join", nick = mNick}));                            }
                         }
                         if (cmd == "chat")
                         {
-                            var text = jMsg.AsObjectGetString("text");
-                            var nick = allChat[socket].Nick;
+                            var mText = jMsg.AsObjectGetString("text");
+                            var mNick = allChat[socket].Nick;
+                            var mCid = Guid.NewGuid();
                             var channel = allChat[socket].Channel;
-                            var cid = Guid.NewGuid();
 
                             foreach (var item in allChat)
                                 if (item.Value.Channel == channel)
-                                    item.Key.Send(
-                                        $"{{\"cmd\": \"chat\",\"nick\": \"{nick}\",\"text\": \"{text}\",\"cid\": \"{cid}\"}}");
-                        }
+                                    item.Key.Send(JsonConvert.SerializeObject(new
+                                        {cmd = "chat", nick = mNick, text = mText, cid = mCid}));                        }
                         if (cmd == "encrypt-chat")
                         {
-                            var text = jMsg.AsObjectGetString("text");
-                            var encrypt = jMsg.AsObjectGetString("encrypt");
-                            var nick = allChat[socket].Nick;
+                            var mText = jMsg.AsObjectGetString("text");
+                            var mEncrypt = jMsg.AsObjectGetString("encrypt");
+                            var mNick = allChat[socket].Nick;
+                            var mCid = Guid.NewGuid();
                             var channel = allChat[socket].Channel;
-                            var cid = Guid.NewGuid();
 
                             foreach (var item in allChat)
                                 if (item.Value.Channel == channel)
-                                    item.Key.Send(
-                                        $"{{\"cmd\": \"encrypt-chat\",\"encrypt\": \"{encrypt}\",\"nick\": \"{nick}\",\"text\": \"{text}\",\"cid\": \"{cid}\"}}");
-                        }
+                                    item.Key.Send(JsonConvert.SerializeObject(new
+                                        {cmd = "chat", encrypt = mEncrypt, nick = mNick, text = mText, cid = mCid}));                        }
                         if (cmd == "whisper")
                         {
                             var toWho = jMsg.AsObjectGetString("to");
-                            var text = jMsg.AsObjectGetString("text");
-                            var nick = allChat[socket].Nick;
-                            var cid = Guid.NewGuid();
+                            var mText = jMsg.AsObjectGetString("text");
+                            var mNick = allChat[socket].Nick;
+                            var mCid = Guid.NewGuid();
 
                             foreach (var item in allChat)
                                 if (item.Value.Channel == allChat[socket].Channel && item.Value.Nick == toWho)
-                                    item.Key.Send(
-                                        $"{{\"cmd\": \"whisper\",\"nick\": \"{nick}\",\"text\": \"{text}\",\"cid\": \"{cid}\"}}");
+                                    item.Key.Send(JsonConvert.SerializeObject(new
+                                        {cmd = "whisper", nick = mNick, text = mText, cid = mCid}));
                         }
                         if (cmd == "delete")
                         {
-                            var cid = jMsg.AsObjectGetString("cid");
+                            var mCid = jMsg.AsObjectGetString("cid");
+                            var mNick = allChat[socket].Nick;
 
                             foreach (var item in allChat)
                                 if (item.Value.Channel == allChat[socket].Channel)
-                                    item.Key.Send($"{allChat[socket].Nick}:delete:{cid}");
+                                    item.Key.Send(JsonConvert.SerializeObject(new
+                                        {cmd = "delete", nick = mNick, cid = mCid}));
                         }
                         if (cmd == "edit")
                         {
-                            var cid = jMsg.AsObjectGetString("cid");
-                            var text = jMsg.AsObjectGetString("text");
+                            var mCid = jMsg.AsObjectGetString("cid");
+                            var mText = jMsg.AsObjectGetString("text");
+                            var mNick = allChat[socket].Nick;
 
                             foreach (var item in allChat)
                                 if (item.Value.Channel == allChat[socket].Channel)
-                                    item.Key.Send($"{allChat[socket].Nick}:edit:{cid}:{text}");
+                                    item.Key.Send(JsonConvert.SerializeObject(new
+                                        {cmd = "edit", nick = mNick, text = mText, cid = mCid}));
                         }
                     }
                     

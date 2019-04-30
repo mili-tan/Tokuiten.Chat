@@ -101,6 +101,19 @@ namespace Tokuiten
                                             { cmd = "whisper", nick = mNick, text = mText, cid = mCid }));
                                     break;
                                 }
+                            case "report":
+                            {
+                                var mWho = jMsg.who.ToString();
+                                var mText = jMsg.text.ToString();
+                                var mReporterNick = allChat[socket].Nick;
+                                var mCid = jMsg.cid.ToString();
+
+                                foreach (var item in allChat)
+                                    if (item.Value.Channel == allChat[socket].Channel)
+                                        item.Key.Send(JsonConvert.SerializeObject(new
+                                            {cmd = "report", text = mText, cid = mCid, reporter = mReporterNick}));
+                                break;
+                            }
                             case "delete":
                                 {
                                     var mCid = jMsg.cid.ToString();

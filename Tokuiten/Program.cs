@@ -103,7 +103,7 @@ namespace Tokuiten
                                 }
                             case "report":
                             {
-                                var mWho = jMsg.who.ToString();
+                                //var mWho = jMsg.who.ToString();
                                 var mText = jMsg.text.ToString();
                                 var mReporterNick = allChat[socket].Nick;
                                 var mCid = jMsg.cid.ToString();

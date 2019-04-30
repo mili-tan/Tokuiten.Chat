@@ -19,6 +19,8 @@
                     inc.innerHTML += `${jMsg.nick}:${jMsg.text}<br/>`;
                 } else if (jMsg.cmd === 'join') {
                     inc.innerHTML += `#:${jMsg.nick}加入了聊天<br/>`;
+                }  else if (jMsg.cmd === 'whisper') {
+                    inc.innerHTML += `${jMsg.nick}对您耳语:${jMsg.text}<br/>`;
                 } else if (jMsg.cmd === 'leave') {
                     inc.innerHTML += `#:${jMsg.nick}离开了聊天<br/>`;
                 } else {
@@ -41,7 +43,14 @@
             form.addEventListener('submit', function (e) {
                 e.preventDefault();
                 const context = inputText.value;
-                ws.send(JSON.stringify({cmd: 'chat', text: context}));
+                if (context.indexOf('/w') !== -1){
+                    const mTo = context.split(' ')[1];
+                    const mText = context.split(' ')[2];
+                    ws.send(JSON.stringify({cmd: 'whisper', text: mText, to : mTo}));
+                    inc.innerHTML += `您对${mTo}耳语:${mText}<br/>`;
+                }else {
+                    ws.send(JSON.stringify({cmd: 'chat', text: context}));
+                }
                 inputText.clear();
             });
 

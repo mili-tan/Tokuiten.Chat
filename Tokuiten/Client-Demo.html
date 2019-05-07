@@ -9,6 +9,12 @@
             const form = document.getElementById('sendForm');
             const inputText = document.getElementById('sendText');
 
+            let channel = Math.random().toString(32).substr(8);
+            const urlInfo = window.document.location.href;
+            if (urlInfo.indexOf("?")){
+                channel = urlInfo.substr(urlInfo.indexOf("?")+1,urlInfo.length);
+            }
+
             inc.innerHTML += "#:正在连接…<br/>";
 
             window.ws = new wsImp('ws://localhost:23333');
@@ -30,10 +36,10 @@
 
             ws.onopen = function () {
                 inc.innerHTML += '#:已连接<br/>';
-                const nick = prompt('您的昵称:', Math.random().toString(32).substr(8));
-                const channel = prompt('您的频道:', '233');
-                inc.innerHTML += `#:您的昵称:[${nick}], 您的频道:[${channel}]<br/>`;
-                ws.send(JSON.stringify({cmd: 'join', nick: nick, channel: channel}));
+                const mNick = prompt('您的昵称:', Math.random().toString(32).substr(8));
+                const mChannel = prompt('您的频道:', channel);
+                inc.innerHTML += `#:您的昵称:[${mNick}], 您的频道:[${mChannel}]<br/>`;
+                ws.send(JSON.stringify({cmd: 'join', nick: mNick, channel: mChannel}));
             };
 
             ws.onclose = function () {
